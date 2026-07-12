@@ -1,0 +1,6 @@
+.DS_Store
+*.bak-*
+.subagents_configs-state.json
+config.toml
+auth.json
+
