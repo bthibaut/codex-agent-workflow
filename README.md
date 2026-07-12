@@ -91,6 +91,13 @@ Ces valeurs sont des recommandations de configuration, pas des garanties du
 runtime. Elles doivent être relues lorsque les modèles disponibles ou les
 conventions de Codex évoluent.
 
+La politique de routage documentée décrit la stratégie d'escalade souhaitée.
+Les définitions TOML versionnées représentent l'implémentation personnelle
+actuelle de cette stratégie et peuvent utiliser un sous-ensemble plus restreint
+des rôles ou modèles disponibles. Une différence entre la politique et les
+fichiers agents doit donc être traitée comme un point à expliciter ou à corriger,
+et non comme une capacité automatiquement disponible.
+
 Les sous-agents ont des responsabilités spécialisées :
 
 - `code-explorer` : exploration large, recherche de fichiers, traçage de
@@ -228,6 +235,51 @@ Ne fais aucun commit ni push.
 Le main agent devrait sélectionner les agents spécialisés lorsque la tâche le
 justifie. Une demande explicite reste possible lorsqu'un agent précis est
 nécessaire.
+
+## Étude de cas : Pokédex React
+
+Le workflow a été testé sur la création d'une application React/Vite/TypeScript
+consommant PokeAPI.
+
+La première implémentation compilait et ses tests initiaux passaient, mais la
+revue indépendante a découvert un défaut fonctionnel important : la recherche
+et les filtres ne s'appliquaient qu'aux 24 Pokémon déjà chargés. Un Pokémon
+présent plus loin dans le Pokédex pouvait donc être déclaré absent.
+
+L'agent d'implémentation a ensuite corrigé l'architecture en séparant un index
+léger couvrant le Pokédex des détails chargés progressivement. La correction a
+également ajouté des tests d'intégration, la gestion des réponses partielles,
+la conservation du contexte lors d'un retry et une gestion accessible de la
+modale.
+
+Ce cas illustre l'intérêt de séparer production et évaluation : un code qui
+compile et passe des tests locaux peut encore contenir une erreur dans
+l'interaction réelle entre plusieurs fonctionnalités.
+
+![Résultat du Pokédex](docs/images/pokedex-result.png)
+
+_Résultat final obtenu après un premier cycle complet du workflow agentique - implémentation, revue indépendante, corrections et validation - sans intervention manuelle supplémentaire._
+
+## Validation des définitions TOML
+
+Après toute modification d'un agent, vérifier que ses fichiers sont lisibles
+avec le parseur TOML de la bibliothèque standard Python :
+
+```sh
+python3 - <<'PY'
+from pathlib import Path
+import tomllib
+
+for path in sorted(Path("agents").glob("*.toml")):
+    with path.open("rb") as f:
+        tomllib.load(f)
+    print(f"valid: {path}")
+PY
+```
+
+Cette vérification contrôle la syntaxe TOML, mais pas la qualité des prompts,
+la validité des modèles choisis ni la cohérence complète du routage. Ces points
+doivent être vérifiés par revue et par un test réel sur une tâche limitée.
 
 ## Sécurité et gouvernance
 
