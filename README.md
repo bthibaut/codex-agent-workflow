@@ -30,9 +30,10 @@ profondeur de raisonnement :
 | --- | --- | --- | --- |
 | Main agent | `gpt-5.6-sol` | `low` | Coordination, routage et synthèse |
 | `code-explorer` | `gpt-5.6-luna` | `high` | Exploration large et traçage des contrats |
+| `architecture-advisor` | `gpt-6-astra` | `medium` | Conseil architectural en lecture seule |
 | `implementer` | `gpt-5.6-luna` | `high` | Fonctionnalités, corrections et tests |
 | `quick-implementer` | `gpt-5.6-luna` | `high` | Petits changements mécaniques ciblés |
-| `code-reviewer` | `gpt-5.6-sol` | `low` | Revue indépendante en lecture seule |
+| `code-reviewer` | `gpt-6-astra` | `low` | Revue indépendante en lecture seule |
 | `commit-pusher` | `gpt-5.6-luna` | `low` | Commit et push explicitement demandés |
 
 Pour les tâches d'implémentation bornées, `gpt-5.6-luna` avec un raisonnement
@@ -40,7 +41,11 @@ Pour les tâches d'implémentation bornées, `gpt-5.6-luna` avec un raisonnement
 corrections qui demandent une analyse locale approfondie. On n'utilise pas un
 palier plus coûteux comme `terra` par défaut : il ne doit être envisagé que si
 des évaluations propres au dépôt montrent un meilleur taux de réussite, une
-meilleure latence ou un coût total inférieur à la combinaison Luna/Sol adaptée.
+meilleure latence ou un coût total inférieur à la configuration actuelle.
+
+Les deux implémenteurs restent sur Luna `high`. Leur distinction porte sur le
+périmètre et les instructions, sans garantie de coût inférieur pour le profil
+`quick-implementer`.
 
 De même, un raisonnement `high` pour Sol est une escalade, pas le réglage
 normal du main agent. Avant d'augmenter le raisonnement, il faut vérifier que
@@ -67,7 +72,9 @@ Le choix d'un modèle doit donc prendre en compte :
 La difficulté apparente n'est pas le seul critère de routage. Une refactorisation
 complexe mais isolée peut rester adaptée à Luna, tandis qu'une modification
 apparemment simple touchant l'authentification, les paiements, les permissions,
-une migration ou une configuration de production peut justifier Sol.
+une migration ou une configuration de production justifie une revue attentive
+par `code-reviewer`. Une décision architecturale complexe peut aussi justifier
+une consultation de `architecture-advisor`.
 
 L'escalade doit refléter l'impact potentiel d'une erreur, et pas seulement le
 nombre de fichiers concernés.
@@ -102,6 +109,8 @@ Les sous-agents ont des responsabilités spécialisées :
 
 - `code-explorer` : exploration large, recherche de fichiers, traçage de
   contrats et compréhension d'un dépôt ;
+- `architecture-advisor` : recommandation architecturale argumentée,
+  alternatives, conséquences, risques et stratégie de migration ou validation ;
 - `quick-implementer` : changements mécaniques, bien spécifiés et limités ;
 - `implementer` : fonctionnalités, corrections et changements nécessitant des
   tests ou plusieurs fichiers ;
@@ -130,6 +139,32 @@ corrections et tests de non-régression
 La délégation automatique est une règle de comportement, pas une garantie
 mécanique. Le main peut traiter directement une tâche triviale ou déléguer une
 tâche qui nécessite une exploration ou une implémentation spécialisée.
+
+Une recherche ciblée pour localiser un fichier peut être réalisée directement.
+L'explorateur intervient lorsque l'investigation nécessite de croiser plusieurs
+modules ou de suivre des contrats et des flux de données.
+
+Le conseiller architectural est facultatif : il ne constitue pas une étape du
+flux par défaut. Le coordinateur le consulte pour une décision complexe aux
+compromis significatifs, par exemple sur des frontières de modules, des contrats
+partagés ou une migration difficile à inverser. Un bug difficile ou un échec
+d'implémentation ne suffit pas à le déclencher. Les critères de consultation
+figurent dans le routage ; le profil du conseiller définit sa méthode et ses
+limites. Le coordinateur conserve la décision et transmet le choix retenu à
+l'implémenteur. La revue du résultat reste indépendante.
+
+La validation est adaptée au changement : tests pertinents pour les comportements
+modifiés, contrôles de syntaxe ou de cohérence pour les modifications mécaniques
+de documentation et de configuration. Les vérifications impossibles et les
+échecs préexistants doivent être explicités.
+
+Après une revue demandant des corrections, l'implémenteur corrige et relance les
+contrôles pertinents, puis le reviewer vérifie le résultat. Si la même difficulté
+persiste après deux tentatives de correction, le coordinateur reprend le
+diagnostic et choisit une autre approche.
+
+Lors d'une publication autorisée, `commit-pusher` vérifie la destination : sans
+upstream, il ne suppose pas que le remote à utiliser est `origin`.
 
 ## Contenu du dépôt
 
