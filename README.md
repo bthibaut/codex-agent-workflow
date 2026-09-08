@@ -10,7 +10,7 @@ complète de ma configuration machine.
 
 Le main agent reste le coordinateur. Il conserve le contexte global, comprend
 la demande utilisateur, choisit les sous-agents pertinents et assemble leurs
-résultats. Il est recommandé de le faire fonctionner avec `gpt-5.6-sol` et un
+résultats. La configuration locale utilisée est `gpt-6-astra` avec un
 niveau de raisonnement `low` : son rôle est principalement de router, suivre
 l'avancement et synthétiser les rapports, plutôt que de refaire lui-même toute
 l'exploration ou l'implémentation. Il n'est donc pas nécessaire de lui attribuer
@@ -26,9 +26,9 @@ expliquer ou échec de validation dont la cause reste incertaine.
 Les rôles spécialisés utilisent le compromis suivant entre coût, rapidité et
 profondeur de raisonnement :
 
-| Rôle | Modèle recommandé | Raisonnement | Responsabilité |
+| Rôle | Modèle utilisé | Raisonnement | Responsabilité |
 | --- | --- | --- | --- |
-| Main agent | `gpt-5.6-sol` | `low` | Coordination, routage et synthèse |
+| Main agent | `gpt-6-astra` | `low` | Coordination, routage et synthèse |
 | `code-explorer` | `gpt-5.6-luna` | `high` | Exploration large et traçage des contrats |
 | `architecture-advisor` | `gpt-6-astra` | `medium` | Conseil architectural en lecture seule |
 | `implementer` | `gpt-5.6-luna` | `high` | Fonctionnalités, corrections et tests |
@@ -47,12 +47,18 @@ Les deux implémenteurs restent sur Luna `high`. Leur distinction porte sur le
 périmètre et les instructions, sans garantie de coût inférieur pour le profil
 `quick-implementer`.
 
-De même, un raisonnement `high` pour Sol est une escalade, pas le réglage
+De même, un raisonnement `high` pour le coordinateur est une escalade, pas le réglage
 normal du main agent. Avant d'augmenter le raisonnement, il faut vérifier que
 le problème n'est pas simplement dû à un manque de contexte, à des critères
 d'acceptation vagues, à une permission absente ou à une erreur d'environnement.
 
 ### Optimiser le coût de la tâche terminée
+
+`gpt-5.6-sol` avec un raisonnement `low` reste une alternative à évaluer pour
+réduire le coût de coordination. Ce dépôt conserve Astra low comme choix
+actuel ; aucune économie globale n'est démontrée par ce seul choix de modèles.
+Le réglage du coordinateur est documenté ici, mais son `config.toml` n'est pas
+versionné dans ce dépôt.
 
 Le coût par token n'est pas le seul indicateur pertinent. Un modèle moins
 coûteux qui nécessite plusieurs tentatives, corrections ou revues peut coûter
@@ -66,6 +72,23 @@ Le choix d'un modèle doit donc prendre en compte :
 - le nombre de cycles de correction ;
 - le coût des tests et de la revue ;
 - le temps nécessaire pour obtenir un résultat vérifiable.
+
+Pour comparer deux configurations, observer des tâches comparables et relever
+la consommation totale disponible, la durée, les cycles de correction et les
+défauts découverts. Distinguer les tokens, les crédits et les limites du forfait ;
+ne pas déduire une économie du seul nombre d'agents ou de messages affichés.
+
+Le coordinateur transmet un mandat court : objectif, périmètre, contraintes,
+critères d'acceptation et validation attendue. Il exploite les rapports reçus
+sans refaire les recherches déjà couvertes. Les reprises d'une même tâche et
+d'un même rôle privilégient l'agent existant ; un sujet indépendant ou un
+contexte devenu inadapté justifie un nouvel agent avec un résumé ciblé.
+La réutilisation évite parfois une nouvelle exploration, mais ne garantit pas
+une consommation inférieure si l'historique accumulé est volumineux.
+
+Chaque délégation annonce le rôle, le modèle, le raisonnement et la création ou
+la reprise de l'agent. Les simples demandes de statut ne sont pas des
+délégations et ne doivent pas devenir des interrogations répétitives inutiles.
 
 ### Escalader selon le périmètre de risque
 
@@ -94,7 +117,7 @@ Une escalade est justifiée par exemple par :
 - un échec de validation dont la cause reste inexpliquée ;
 - un risque important de sécurité, compatibilité, migration ou concurrence.
 
-Ces valeurs sont des recommandations de configuration, pas des garanties du
+Ces valeurs décrivent la configuration choisie, pas des garanties du
 runtime. Elles doivent être relues lorsque les modèles disponibles ou les
 conventions de Codex évoluent.
 
@@ -158,8 +181,17 @@ modifiés, contrôles de syntaxe ou de cohérence pour les modifications mécani
 de documentation et de configuration. Les vérifications impossibles et les
 échecs préexistants doivent être explicités.
 
+Le mandat de revue précise la base de comparaison, la version cible, les
+fichiers ou portions concernés, les critères d'acceptation et les résultats de
+validation. Le reviewer examine les changements pertinents, qu'ils soient
+indexés, non indexés, nouveaux ou déjà commités, sans inclure le travail
+préexistant hors périmètre. Un arbre de travail propre ne signifie pas qu'une
+branche ne contient rien à revoir.
+
 Après une revue demandant des corrections, l'implémenteur corrige et relance les
-contrôles pertinents, puis le reviewer vérifie le résultat. Si la même difficulté
+contrôles pertinents. Le reviewer conserve la base de comparaison et les
+observations précédentes, vérifie les corrections et leurs effets, et élargit
+la revue si le périmètre ou le risque le justifie. Si la même difficulté
 persiste après deux tentatives de correction, le coordinateur reprend le
 diagnostic et choisit une autre approche.
 
@@ -319,12 +351,13 @@ doivent être vérifiés par revue et par un test réel sur une tâche limitée.
 ## Sécurité et gouvernance
 
 - Les agents ne doivent pas recevoir plus de permissions que nécessaire.
-- Les agents d'exploration et de revue doivent rester en lecture seule lorsque
-  le contexte le permet.
+- L'explorateur, le reviewer et le conseiller déclarent explicitement
+  `sandbox_mode = "read-only"`. Les corrections sont confiées à l'implémenteur.
 - `commit-pusher` ne doit jamais être lancé pour une simple demande de codage.
 - Aucun commit ou push ne doit être effectué sans demande explicite.
-- Les tests et les builds doivent être exécutés avant de considérer une tâche
-  terminée.
+- La validation doit être adaptée au changement : tests et builds pertinents
+  pour le code, contrôles de syntaxe et de cohérence pour les modifications
+  mécaniques. Signaler les vérifications impossibles et les échecs préexistants.
 - Une revue indépendante est particulièrement utile après une modification
   multi-fichiers, une modification d'architecture ou un changement risqué.
 - Les consignes globales doivent rester courtes ; les règles propres à un dépôt

@@ -4,7 +4,7 @@ Default to cost-aware delegation for repository work. The user has explicitly au
 
 Keep the main context lean: delegate raw discovery and bounded implementation, request concise reports, and avoid sending the full conversation when a task-local prompt is sufficient.
 
-When delegating, select these custom agents by their exact `name` from `~/.codex/agents`:
+Resolve custom-agent configurations from `$CODEX_HOME/agents` when `CODEX_HOME` is set; otherwise use `~/.codex/agents`. Select agents by their exact `name`:
 
 - Repository discovery, broad searches, contract tracing, and read-only investigation -> `code-explorer`
 - Advice on complex architectural decisions with significant tradeoffs -> `architecture-advisor`
@@ -26,6 +26,15 @@ Agent identity and display labels:
 - If the agent's runtime metadata differs from the delegation announcement, correct the user-visible record immediately.
 - In the final task summary, list each custom agent that materially contributed, whether newly created or reused, with its actual model and reasoning effort.
 - If runtime metadata shows no custom role (for example, `agent_role` is null), describe it as a generic subagent rather than attributing a custom-agent personality or configuration to it.
+
+Agent lifecycle and delegation briefs:
+
+- For follow-up work on the same task and role, prefer reusing an existing agent while its context remains relevant.
+- For a new or unrelated task, or when the existing context is stale or overloaded, create a fresh agent with a concise task-local brief.
+- Reuse is a continuity choice; do not assume it saves tokens or guarantees lower cost.
+- Every delegation, whether creating or reusing an agent, must announce the selected custom agent, model, reasoning effort, and lifecycle state using the formats above.
+- Give each work assignment a concise brief covering the objective, scope, files or symbols, constraints, expected validation, and relevant prior findings. Omit full conversation history when the brief is sufficient.
+- Avoid frequent status polling. Follow runtime progress and notification constraints, and poll only when a meaningful handoff or decision requires it.
 
 Default workflow for coding changes:
 
@@ -65,9 +74,11 @@ The coordinator retains the decision and passes the chosen approach and rational
 
 ## Correction loop
 
+Before the first review, the coordinator provides the baseline ref/commit or pre-existing state, target version (working tree, index, or commit), intended files/hunks, acceptance criteria, and available validation results. Account for applicable staged, unstaged, untracked, and committed changes without including unrelated user work. Record the reviewed target and findings so a later correction delta can be identified; if the delta cannot be reconstructed reliably, disclose that limitation and review the relevant scope.
+
 1. The reviewer reports concrete findings with locations, impact, and the required outcome.
 2. The implementer receives those findings and relevant context, makes scoped corrections, and reruns the relevant checks.
-3. The reviewer verifies the corrections and any affected behavior before issuing an updated verdict.
+3. The coordinator supplies the previous findings, initial baseline, previously reviewed target, and updated target. The reviewer verifies the correction delta and affected behavior before issuing an updated verdict, widening the review when scope or risk materially changes. Keep the reviewer distinct from the implementer.
 4. If the same difficulty remains after two correction attempts, the coordinator takes over diagnosis and chooses a different approach. A model change must be explicit and supported by the available configuration; switching implementation roles alone does not change the model.
 
 Avoid parallel write-heavy delegation unless the work is divided into non-overlapping files or the user explicitly requests it.
