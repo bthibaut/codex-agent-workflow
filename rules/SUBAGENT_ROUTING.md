@@ -8,6 +8,7 @@ Resolve custom-agent configurations from `$CODEX_HOME/agents` when `CODEX_HOME` 
 
 - Repository discovery, broad searches, contract tracing, and read-only investigation -> `code-explorer`
 - Advice on complex architectural decisions with significant tradeoffs -> `architecture-advisor`
+- Evidence-based advice on a bounded technical impasse -> `technical-advisor`
 - Mechanical, well-specified changes limited to one or two files -> `quick-implementer`
 - Feature or bug-fix implementation with appropriate tests and validation -> `implementer`
 - Review of completed code changes -> `code-reviewer`
@@ -55,6 +56,8 @@ Do not use `code-explorer` merely to re-read a file already identified by the us
 
 ## Cost and escalation policy
 
+The configured coordinator default is Sol low. Sol medium can be selected for harder framing, or Astra for exceptionally complex coordination. These are explicit session/configuration choices, not automatic model changes implied by routing. Keep the chosen setting stable during a task where practical.
+
 - Select the role whose scope fits the task and read its actual model and reasoning settings before delegation. Both implementation roles use Luna high; their distinction is scope and instructions, not a guaranteed cost or capability difference.
 - Do not spawn multiple agents to solve the same problem unless independent review is justified.
 - Prefer sequential handoffs with concise artifacts over parallel duplication.
@@ -71,6 +74,16 @@ Consult it only when a concrete complex decision involves significant tradeoffs 
 Provide the decision to resolve, goals, constraints, existing contracts, and the explorer's summary when available. Request a justified recommendation, credible alternatives, consequences, risks, and an appropriate migration or validation strategy. Do not invoke an explorer solely to prepare a consultation if the necessary context is already known.
 
 The coordinator retains the decision and passes the chosen approach and rationale to the implementer. The advisor does not implement changes or replace independent code review. Reconsult only when new evidence or a changed constraint materially affects the decision.
+
+## Optional technical consultation
+
+`technical-advisor` uses Astra low and is optional. The coordinator may consult it when a targeted diagnosis fails to make progress, observations contradict the current hypotheses, or a technically difficult behavior remains unexplained. A routine doubt, syntax error, or missing dependency alone does not justify consultation.
+
+The implementer reports the objective, expected and observed behavior, evidence, attempts and outcomes, and a precise question to the coordinator. The coordinator decides whether consultation is useful and sends a concise brief; implementers do not automatically contact advisors. Do not require repeated blind attempts or wait for two correction cycles when a concrete impasse is already established.
+
+Ask for a justified hypothesis and a discriminating check with expected outcomes. The coordinator evaluates the advice and gives the implementer a precise next step; the implementer validates it. Reconsult only with new evidence or a materially changed question. Medium reasoning is an explicit option for a harder diagnosis, not an automatic escalation or a second default advisor.
+
+If the diagnosis reveals a complex architectural choice, the coordinator decides whether the architectural advisor adds value; never invoke both advisors automatically. Exploration may precede architectural advice when existing contracts are unknown. Keep each advisor's context separate from the independent reviewer, even when they use the same model.
 
 ## Correction loop
 

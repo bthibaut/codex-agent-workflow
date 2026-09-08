@@ -10,7 +10,7 @@ complète de ma configuration machine.
 
 Le main agent reste le coordinateur. Il conserve le contexte global, comprend
 la demande utilisateur, choisit les sous-agents pertinents et assemble leurs
-résultats. La configuration locale utilisée est `gpt-6-astra` avec un
+résultats. La configuration locale par défaut est `gpt-5.6-sol` avec un
 niveau de raisonnement `low` : son rôle est principalement de router, suivre
 l'avancement et synthétiser les rapports, plutôt que de refaire lui-même toute
 l'exploration ou l'implémentation. Il n'est donc pas nécessaire de lui attribuer
@@ -28,9 +28,10 @@ profondeur de raisonnement :
 
 | Rôle | Modèle utilisé | Raisonnement | Responsabilité |
 | --- | --- | --- | --- |
-| Main agent | `gpt-6-astra` | `low` | Coordination, routage et synthèse |
+| Main agent | `gpt-5.6-sol` | `low` | Coordination, routage et synthèse |
 | `code-explorer` | `gpt-5.6-luna` | `high` | Exploration large et traçage des contrats |
 | `architecture-advisor` | `gpt-6-astra` | `medium` | Conseil architectural en lecture seule |
+| `technical-advisor` | `gpt-6-astra` | `low` | Diagnostic technique ciblé en lecture seule |
 | `implementer` | `gpt-5.6-luna` | `high` | Fonctionnalités, corrections et tests |
 | `quick-implementer` | `gpt-5.6-luna` | `high` | Petits changements mécaniques ciblés |
 | `code-reviewer` | `gpt-6-astra` | `low` | Revue indépendante en lecture seule |
@@ -54,9 +55,11 @@ d'acceptation vagues, à une permission absente ou à une erreur d'environnement
 
 ### Optimiser le coût de la tâche terminée
 
-`gpt-5.6-sol` avec un raisonnement `low` reste une alternative à évaluer pour
-réduire le coût de coordination. Ce dépôt conserve Astra low comme choix
-actuel ; aucune économie globale n'est démontrée par ce seul choix de modèles.
+Sol low est le choix initial du coordinateur. Sol medium peut être choisi pour
+un cadrage plus difficile, et Astra pour une coordination particulièrement
+complexe. Ces choix sont explicites ; le routage ne change pas automatiquement
+le modèle d'une session. Aucune économie globale n'est démontrée par ces seuls
+réglages.
 Le réglage du coordinateur est documenté ici, mais son `config.toml` n'est pas
 versionné dans ce dépôt.
 
@@ -134,6 +137,8 @@ Les sous-agents ont des responsabilités spécialisées :
   contrats et compréhension d'un dépôt ;
 - `architecture-advisor` : recommandation architecturale argumentée,
   alternatives, conséquences, risques et stratégie de migration ou validation ;
+- `technical-advisor` : diagnostic d'une impasse technique, hypothèses étayées
+  et prochaine vérification permettant de les départager ;
 - `quick-implementer` : changements mécaniques, bien spécifiés et limités ;
 - `implementer` : fonctionnalités, corrections et changements nécessitant des
   tests ou plusieurs fichiers ;
@@ -175,6 +180,22 @@ d'implémentation ne suffit pas à le déclencher. Les critères de consultation
 figurent dans le routage ; le profil du conseiller définit sa méthode et ses
 limites. Le coordinateur conserve la décision et transmet le choix retenu à
 l'implémenteur. La revue du résultat reste indépendante.
+
+Le conseiller technique est également facultatif. Luna signale au coordinateur
+les observations, les essais déjà réalisés et une question précise. Si une
+impasse concrète est établie, le coordinateur peut consulter Astra low puis
+transmettre une orientation à Luna. Il n'est pas nécessaire d'attendre deux
+cycles infructueux, mais un simple doute ne déclenche pas une consultation.
+Le conseiller fournit une hypothèse argumentée et une vérification avec ses
+résultats attendus ; l'implémenteur exécute et valide. Astra medium reste une
+option explicite si le diagnostic le nécessite.
+
+Une exploration peut précéder le conseil architectural pour identifier les
+contrats existants. Si un diagnostic technique révèle un choix architectural,
+le coordinateur décide si l'autre conseiller est utile : aucun enchaînement
+automatique des deux. Les conseillers et le reviewer gardent des contextes
+distincts. Les critères de consultation restent dans le routage, tandis que
+les profils décrivent la méthode et les limites de chaque conseiller.
 
 La validation est adaptée au changement : tests pertinents pour les comportements
 modifiés, contrôles de syntaxe ou de cohérence pour les modifications mécaniques
@@ -351,7 +372,7 @@ doivent être vérifiés par revue et par un test réel sur une tâche limitée.
 ## Sécurité et gouvernance
 
 - Les agents ne doivent pas recevoir plus de permissions que nécessaire.
-- L'explorateur, le reviewer et le conseiller déclarent explicitement
+- L'explorateur, le reviewer et les deux conseillers déclarent explicitement
   `sandbox_mode = "read-only"`. Les corrections sont confiées à l'implémenteur.
 - `commit-pusher` ne doit jamais être lancé pour une simple demande de codage.
 - Aucun commit ou push ne doit être effectué sans demande explicite.
