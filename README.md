@@ -10,7 +10,7 @@ complète de ma configuration machine.
 
 Le main agent reste le coordinateur. Il conserve le contexte global, comprend
 la demande utilisateur, choisit les sous-agents pertinents et assemble leurs
-résultats. La configuration locale par défaut est `gpt-5.6-sol` avec un
+résultats. La configuration locale par défaut est `gpt-6-sol` avec un
 niveau de raisonnement `low` : son rôle est principalement de router, suivre
 l'avancement et synthétiser les rapports, plutôt que de refaire lui-même toute
 l'exploration ou l'implémentation. Il n'est donc pas nécessaire de lui attribuer
@@ -28,16 +28,16 @@ profondeur de raisonnement :
 
 | Rôle | Modèle utilisé | Raisonnement | Responsabilité |
 | --- | --- | --- | --- |
-| Main agent | `gpt-5.6-sol` | `low` | Coordination, routage et synthèse |
-| `code-explorer` | `gpt-5.6-luna` | `high` | Exploration large et traçage des contrats |
+| Main agent | `gpt-6-sol` | `low` | Coordination, routage et synthèse |
+| `code-explorer` | `gpt-6-luna` | `high` | Exploration large et traçage des contrats |
 | `architecture-advisor` | `gpt-6-astra` | `medium` | Conseil architectural en lecture seule |
 | `technical-advisor` | `gpt-6-astra` | `low` | Diagnostic technique ciblé en lecture seule |
-| `implementer` | `gpt-5.6-luna` | `high` | Fonctionnalités, corrections et tests |
-| `quick-implementer` | `gpt-5.6-luna` | `high` | Petits changements mécaniques ciblés |
-| `code-reviewer` | `gpt-6-astra` | `low` | Revue indépendante en lecture seule |
-| `commit-pusher` | `gpt-5.6-luna` | `low` | Commit et push explicitement demandés |
+| `implementer` | `gpt-6-luna` | `high` | Fonctionnalités, corrections et tests |
+| `quick-implementer` | `gpt-6-luna` | `high` | Petits changements mécaniques ciblés |
+| `code-reviewer` | `gpt-6-sol` | `high` | Revue indépendante en lecture seule |
+| `commit-pusher` | `gpt-6-luna` | `low` | Commit et push explicitement demandés |
 
-Pour les tâches d'implémentation bornées, `gpt-5.6-luna` avec un raisonnement
+Pour les tâches d'implémentation bornées, `gpt-6-luna` avec un raisonnement
 `high` est considéré comme suffisant dans ce workflow, y compris pour les
 corrections qui demandent une analyse locale approfondie. On n'utilise pas un
 palier plus coûteux comme `terra` par défaut : il ne doit être envisagé que si

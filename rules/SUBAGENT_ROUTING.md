@@ -62,7 +62,7 @@ The configured coordinator default is Sol low. Sol medium can be selected for ha
 - Do not spawn multiple agents to solve the same problem unless independent review is justified.
 - Prefer sequential handoffs with concise artifacts over parallel duplication.
 - Escalate from `quick-implementer` to `implementer` when a design decision is required, the assigned scope expands, or a failure requires substantive diagnosis.
-- Reserve `code-reviewer` (Astra low) for behavior changes, correctness, security, architecture, or other meaningful risks. Validate mechanical documentation/configuration edits directly when appropriate.
+- Reserve `code-reviewer` (Sol high) for behavior changes, correctness, security, architecture, or other meaningful risks. Validate mechanical documentation/configuration edits directly when appropriate.
 - Keep outputs concise and stop once evidence is sufficient; preserve the configured reasoning effort.
 
 ## Optional architectural consultation
