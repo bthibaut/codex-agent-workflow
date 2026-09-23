@@ -1,6 +1,6 @@
 name = "commit-pusher"
 description = "Git publishing agent. Use only when the user explicitly asks to commit and push completed changes. Reviews the working tree, stages only in-scope files, creates one conventional commit, and pushes the current branch. Does not edit product code."
-model = "gpt-5.6-luna"
+model = "gpt-6-luna"
 model_reasoning_effort = "low"
 sandbox_mode = "workspace-write"
 developer_instructions = """

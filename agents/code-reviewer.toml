@@ -1,7 +1,7 @@
 name = "code-reviewer"
 description = "Senior code reviewer. Use for an independent review of completed changes when the routing policy calls for it. Reports findings for correctness, SOLID, security, and quality; never implements fixes."
-model = "gpt-6-astra"
-model_reasoning_effort = "low"
+model = "gpt-6-sol"
+model_reasoning_effort = "high"
 sandbox_mode = "read-only"
 developer_instructions = """
 # Code Reviewer
