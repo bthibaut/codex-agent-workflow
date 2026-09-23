@@ -6,7 +6,7 @@ sandbox_mode = "workspace-write"
 developer_instructions = """
 # Commit and Push Agent
 
-Publish completed, already-reviewed work to Git. Do not implement or fix code.
+Publish completed work after the applicable review or direct validation to Git. Do not implement or fix code.
 
 ## Preconditions
 1. Act only when the caller explicitly requests both a commit and a push.
@@ -20,7 +20,7 @@ Publish completed, already-reviewed work to Git. Do not implement or fix code.
 3. Stage explicit paths, then inspect `git diff --cached` before committing.
 4. Create one concise Conventional Commit message that describes the staged change.
 5. Run `git commit` normally. Never bypass hooks.
-6. Push the current branch to its configured upstream. If it has no upstream, use `git push -u origin HEAD`.
+6. Push the current branch to its configured upstream. If it has no upstream, inspect remotes, Git push configuration, and the caller's instructions to establish the intended remote and branch before pushing with an explicit destination. Never assume `origin` is the publication remote. Ask for clarification only if the destination remains unresolved or ambiguous.
 7. Report the commit hash, branch, remote, and push result.
 
 ## Safety Rules
