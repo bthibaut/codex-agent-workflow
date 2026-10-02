@@ -1,7 +1,7 @@
 name = "architecture-advisor"
 description = "Read-only advisor for complex architectural decisions. Compares credible alternatives and recommends a justified approach with consequences, risks, and validation or migration guidance. Does not implement or approve code."
-model = "gpt-6-astra"
-model_reasoning_effort = "medium"
+model = "gpt-6.1-sol"
+model_reasoning_effort = "high"
 sandbox_mode = "read-only"
 developer_instructions = """
 # Architecture Advisor

@@ -10,7 +10,7 @@ complète de ma configuration machine.
 
 Le main agent reste le coordinateur. Il conserve le contexte global, comprend
 la demande utilisateur, choisit les sous-agents pertinents et assemble leurs
-résultats. La configuration locale par défaut est `gpt-6-sol` avec un
+résultats. La configuration locale par défaut est `gpt-6.1-sol` avec un
 niveau de raisonnement `low` : son rôle est principalement de router, suivre
 l'avancement et synthétiser les rapports, plutôt que de refaire lui-même toute
 l'exploration ou l'implémentation. Il n'est donc pas nécessaire de lui attribuer
@@ -28,13 +28,13 @@ profondeur de raisonnement :
 
 | Rôle | Modèle utilisé | Raisonnement | Responsabilité |
 | --- | --- | --- | --- |
-| Main agent | `gpt-6-sol` | `low` | Coordination, routage et synthèse |
+| Main agent | `gpt-6.1-sol` | `low` | Coordination, routage et synthèse |
 | `code-explorer` | `gpt-6-luna` | `high` | Exploration large et traçage des contrats |
-| `architecture-advisor` | `gpt-6-astra` | `medium` | Conseil architectural en lecture seule |
-| `technical-advisor` | `gpt-6-astra` | `low` | Diagnostic technique ciblé en lecture seule |
+| `architecture-advisor` | `gpt-6.1-sol` | `high` | Conseil architectural en lecture seule |
+| `technical-advisor` | `gpt-6.1-sol` | `high` | Diagnostic technique ciblé en lecture seule |
 | `implementer` | `gpt-6-luna` | `high` | Fonctionnalités, corrections et tests |
 | `quick-implementer` | `gpt-6-luna` | `high` | Petits changements mécaniques ciblés |
-| `code-reviewer` | `gpt-6-sol` | `high` | Revue indépendante en lecture seule |
+| `code-reviewer` | `gpt-6.1-sol` | `high` | Revue indépendante en lecture seule |
 | `commit-pusher` | `gpt-6-luna` | `low` | Commit et push explicitement demandés |
 
 Pour les tâches d'implémentation bornées, `gpt-6-luna` avec un raisonnement
@@ -183,12 +183,12 @@ l'implémenteur. La revue du résultat reste indépendante.
 
 Le conseiller technique est également facultatif. Luna signale au coordinateur
 les observations, les essais déjà réalisés et une question précise. Si une
-impasse concrète est établie, le coordinateur peut consulter Astra low puis
+impasse concrète est établie, le coordinateur peut consulter Sol high puis
 transmettre une orientation à Luna. Il n'est pas nécessaire d'attendre deux
 cycles infructueux, mais un simple doute ne déclenche pas une consultation.
 Le conseiller fournit une hypothèse argumentée et une vérification avec ses
-résultats attendus ; l'implémenteur exécute et valide. Astra medium reste une
-option explicite si le diagnostic le nécessite.
+résultats attendus ; l'implémenteur exécute et valide. Le raisonnement `high`
+est le réglage des deux conseillers.
 
 Une exploration peut précéder le conseil architectural pour identifier les
 contrats existants. Si un diagnostic technique révèle un choix architectural,

@@ -67,7 +67,7 @@ The configured coordinator default is Sol low. Sol medium can be selected for ha
 
 ## Optional architectural consultation
 
-`architecture-advisor` uses Astra medium and is consultative, read-only, and optional. Consultation is occasional, not a required phase of the default workflow.
+`architecture-advisor` uses Sol high and is consultative, read-only, and optional. Consultation is occasional, not a required phase of the default workflow.
 
 Consult it only when a concrete complex decision involves significant tradeoffs between credible solutions, module boundaries or shared contracts, a data migration, or a hard-to-reverse structural choice. A task spanning multiple files, routine design work, a difficult bug, or an implementer failure alone does not trigger consultation.
 
@@ -77,11 +77,11 @@ The coordinator retains the decision and passes the chosen approach and rational
 
 ## Optional technical consultation
 
-`technical-advisor` uses Astra low and is optional. The coordinator may consult it when a targeted diagnosis fails to make progress, observations contradict the current hypotheses, or a technically difficult behavior remains unexplained. A routine doubt, syntax error, or missing dependency alone does not justify consultation.
+`technical-advisor` uses Sol high and is optional. The coordinator may consult it when a targeted diagnosis fails to make progress, observations contradict the current hypotheses, or a technically difficult behavior remains unexplained. A routine doubt, syntax error, or missing dependency alone does not justify consultation.
 
 The implementer reports the objective, expected and observed behavior, evidence, attempts and outcomes, and a precise question to the coordinator. The coordinator decides whether consultation is useful and sends a concise brief; implementers do not automatically contact advisors. Do not require repeated blind attempts or wait for two correction cycles when a concrete impasse is already established.
 
-Ask for a justified hypothesis and a discriminating check with expected outcomes. The coordinator evaluates the advice and gives the implementer a precise next step; the implementer validates it. Reconsult only with new evidence or a materially changed question. Medium reasoning is an explicit option for a harder diagnosis, not an automatic escalation or a second default advisor.
+Ask for a justified hypothesis and a discriminating check with expected outcomes. The coordinator evaluates the advice and gives the implementer a precise next step; the implementer validates it. Reconsult only with new evidence or a materially changed question. High reasoning is the configured default for both advisors, not an automatic reason to invoke a second advisor.
 
 If the diagnosis reveals a complex architectural choice, the coordinator decides whether the architectural advisor adds value; never invoke both advisors automatically. Exploration may precede architectural advice when existing contracts are unknown. Keep each advisor's context separate from the independent reviewer, even when they use the same model.
 
